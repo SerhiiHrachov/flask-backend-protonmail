@@ -1,4 +1,4 @@
-from src import By, WebDriverWait, ActionChains, EC, Keys
+from protonmail import By, WebDriverWait, ActionChains, EC, Keys
 
 
 class NewMail:

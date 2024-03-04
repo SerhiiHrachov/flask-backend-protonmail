@@ -1,4 +1,4 @@
-from src import (
+from protonmail import (
     By,
     EC,
     WebDriverWait,
