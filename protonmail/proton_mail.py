@@ -62,7 +62,7 @@ class ProtonMail:
             return True
         return False
 
-    def get_mails(self, url: str) -> list | bool:
+    def get_mails_(self, url: str) -> list | bool:
         if self.check_current_url(url) is False:
             self.driver.get(url=url)
         sleep(self.delay)
@@ -72,23 +72,17 @@ class ProtonMail:
             return data
         return False
 
-    @property
-    def get_inbox(self):
-        return self.get_mails(self.url + "/u/0/inbox")
+    def get_mail_by_box(self, box):
+        if box == "inbox":
+            box = "/inbox"
+        elif box == "outbox":
+            box = "/all-sent"
+        elif box == "all":
+            box = "/almost-all-mail"
+        elif box == "unread":
+            box = "/almost-all-mail#filter=unread"
+        return self.get_mails_(self.url + "/u/0" + box)
 
-    @property
-    def get_outbox(self):
-        return self.get_mails(self.url + "/u/0/all-sent")
-
-    @property
-    def get_all(self):
-        return self.get_mails(self.url + "/u/0/almost-all-mail")
-
-    @property
-    def get_unread(self):
-        return self.get_mails(self.url + "/u/0/almost-all-mail#filter=unread")
-
-    @property
     def close_session(self) -> bool:
         try:
             self.driver.close()
