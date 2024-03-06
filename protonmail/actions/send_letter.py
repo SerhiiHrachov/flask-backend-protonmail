@@ -1,19 +1,21 @@
 from protonmail import By, WebDriverWait, ActionChains, EC, Keys
 
 
-class NewMail:
+class SendLetter:
     def __init__(self, driver):
         self.driver = driver
         self.wait = WebDriverWait(driver, 10)
         self.action = ActionChains(driver)
-        self.new_mail_btn = '//*[@data-testid="sidebar:compose"]'
+        self.new_letter_btn = '//*[@data-testid="sidebar:compose"]'
         self.subject_field = '//*[@data-testid="composer:subject"]'
         self.recipient_field = '//*[@data-testid="composer:to"]'
-        self.send_mail_btn = '//*[@data-testid="composer:send-button"]'
+        self.send_letter_btn = '//*[@data-testid="composer:send-button"]'
         self.notification = '//span[contains(@class,"notification__content")]'
         try:
             self.wait.until(
-                EC.visibility_of_element_located((By.XPATH, self.new_mail_btn))
+                EC.visibility_of_element_located(
+                    (By.XPATH, self.new_letter_btn)
+                )
             ).click()
         except Exception:
             self.driver.quit()
@@ -31,12 +33,10 @@ class NewMail:
     def enter_message(self, message: str):
         self.action.send_keys(Keys.TAB + message).perform()
 
-    @property
-    def send_mail(self):
-        self.driver.find_element(By.XPATH, self.send_mail_btn).click()
+    def send_letter(self):
+        self.driver.find_element(By.XPATH, self.send_letter_btn).click()
 
-    @property
-    def validate_sended_mail(self) -> bool:
+    def validate_sended_letter(self) -> bool:
         validation = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, self.notification))
         )

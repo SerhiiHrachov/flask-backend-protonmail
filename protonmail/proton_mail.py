@@ -1,6 +1,8 @@
 from protonmail import (
+    print,
     sleep,
     Firefox,
+    Options,
     ActionChains,
     BeautifulSoup,
     WebDriverWait,
@@ -8,10 +10,12 @@ from protonmail import (
     ElementNotVisibleException,
     ElementNotInteractableException,
 )
-from protonmail.sign_in.signin_page import SignPage
 from protonmail.sign_in.home_page import HomePage
-from protonmail.actions.send_mail import NewMail
-from protonmail.actions.get_inbox import GetMails
+from protonmail.sign_in.signin_page import SignPage
+from protonmail.actions.send_letter import SendLetter
+from protonmail.actions.get_letter import GetLetter
+from protonmail.actions.get_mail import GetMail
+from protonmail.actions.make_action import MenuAction
 
 
 class ProtonMail:
@@ -21,12 +25,15 @@ class ProtonMail:
             ElementNotInteractableException,
             ElementNotVisibleException,
         ]
-        self.driver = Firefox(options=None)
+        options = Options()
+        options.add_argument("--headless")
+        self.driver = Firefox(options=options)
         self.wait = WebDriverWait(self.driver, 10, 0.2, errors)
         self.action = ActionChains(self.driver)
         self.driver.implicitly_wait(10)
         self.driver.maximize_window()
         self.url = "https://mail.proton.me"
+        self.all_mail_url = "https://mail.proton.me/u/0/almost-all-mail"
         self.delay = 10
 
     def logining(self, username: str, password: str) -> bool:
@@ -44,14 +51,14 @@ class ProtonMail:
             return True
         return False
 
-    def send_mail(self, recipient: str, subject: str, message: str) -> bool:
+    def send_letter(self, recipient: str, subject: str, message: str) -> bool:
         driver = self.driver
-        mail = NewMail(driver)
-        mail.enter_recipient(recipient=recipient)
-        mail.enter_subject(subject=subject)
-        mail.enter_message(message=message)
-        mail.send_mail
-        if mail.validate_sended_mail:
+        letter = SendLetter(driver)
+        letter.enter_recipient(recipient=recipient)
+        letter.enter_subject(subject=subject)
+        letter.enter_message(message=message)
+        letter.send_letter()
+        if letter.validate_sended_letter():
             print("Mail sended")
             sleep(self.delay)
             return True
@@ -62,12 +69,12 @@ class ProtonMail:
             return True
         return False
 
-    def get_mails_(self, url: str) -> list | bool:
+    def get_mail_(self, url: str) -> list | bool:
         if self.check_current_url(url) is False:
             self.driver.get(url=url)
         sleep(self.delay)
         soup = BeautifulSoup(self.driver.page_source, "lxml")
-        data = GetMails().get_mails(soup=soup)
+        data = GetMail().get_mail(soup=soup)
         if data:
             return data
         return False
@@ -81,7 +88,55 @@ class ProtonMail:
             box = "/almost-all-mail"
         elif box == "unread":
             box = "/almost-all-mail#filter=unread"
-        return self.get_mails_(self.url + "/u/0" + box)
+        return self.get_mail_(self.url + "/u/0" + box)
+
+    def get_letter_by_id(self, id: str) -> dict:
+        driver = self.driver
+        wait = self.wait
+        get_letter = GetLetter(driver, wait)
+        url = self.url + "/u/0/almost-all-mail/" + id
+        driver.get(url=url)
+        sleep(self.delay)
+        soup = BeautifulSoup(driver.page_source, "lxml")
+
+        sender = get_letter.get_sender(soup=soup, id=id)
+        delivery_datetime = get_letter.get_delivery_datetime()
+        recipient = get_letter.get_recipient()
+        subject = get_letter.get_subject()
+        message = get_letter.get_body()
+
+        if not sender or not delivery_datetime or not recipient or not subject:
+            raise Exception("Error")
+        return {
+            "from": sender,
+            "datetime": delivery_datetime,
+            "to": recipient,
+            "subject": subject,
+            "message": message,
+        }
+
+    def get_all_mail_page(self):
+        driver = self.driver
+        wait = self.wait
+        action = self.action
+        self.menu_action = MenuAction(driver, wait, action)
+        if self.check_current_url(self.all_mail_url) is False:
+            self.driver.get(self.all_mail_url)
+
+    def move_to_trash(self, id: str):
+        self.menu_action.trash(id)
+
+    def move_to_archive(self, id: str):
+        self.menu_action.archive(id)
+
+    def mark_as_spam(self, id: str):
+        self.menu_action.spam(id)
+
+    def mark_as_unread(self, id: str):
+        self.menu_action.unread(id)
+
+    def mark_as_read(self, id: str):
+        self.menu_action.read(id)
 
     def close_session(self) -> bool:
         try:
