@@ -1,4 +1,4 @@
-from protonmail import By, EC, print
+from protonmail import By, EC
 
 
 class GetLetter:

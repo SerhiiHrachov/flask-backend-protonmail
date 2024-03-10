@@ -1,29 +1,11 @@
-from protonmail import (
-    By,
-    EC,
-    WebDriverWait,
-    NoSuchElementException,
-    ElementNotInteractableException,
-    ElementNotVisibleException,
-)
+from protonmail import By, EC
 
 
 class SignPage:
 
-    def __init__(self, driver):
-        errors = [
-            NoSuchElementException,
-            ElementNotInteractableException,
-            ElementNotVisibleException,
-        ]
+    def __init__(self, driver, wait):
         self.driver = driver
-        self.wait = WebDriverWait(
-            driver=self.driver,
-            timeout=5,
-            poll_frequency=0.2,
-            ignored_exceptions=errors,
-        )
-
+        self.wait = wait
         self.username_textbox_id = "username"
         self.password_textbox_id = "password"
 

@@ -11,18 +11,14 @@ class MenuAction:
         scroll_script = "arguments[0].scrollIntoView(true);"
         btn = f'//*[@data-testid="context-menu-{name}"]'
         data_element_id = f'//*[@data-element-id="{id}"]'
-        try:
-            letter = self.wait.until(
-                EC.visibility_of_element_located((By.XPATH, data_element_id))
-            )
-            # self.action.scroll_to_element(self.letter).perform()
-            self.driver.execute_script(scroll_script, letter)
-            self.action.context_click(letter).perform()
-            self.driver.find_element(By.XPATH, btn).click()
-            return "ok"
-        except Exception as e:
-            print(e)
-            return None
+
+        letter = self.wait.until(
+            EC.visibility_of_element_located((By.XPATH, data_element_id))
+        )
+        # self.action.scroll_to_element(self.letter).perform()
+        self.driver.execute_script(scroll_script, letter)
+        self.action.context_click(letter).perform()
+        self.driver.find_element(By.XPATH, btn).click()
 
     def trash(self, id):
         self.make(id, "trash")

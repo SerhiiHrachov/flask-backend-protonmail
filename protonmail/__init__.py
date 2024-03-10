@@ -11,3 +11,6 @@ from selenium.common.exceptions import (
     ElementNotVisibleException,
 )
 from bs4 import BeautifulSoup
+from .proton_mail import ProtonMail
+
+proton = ProtonMail()

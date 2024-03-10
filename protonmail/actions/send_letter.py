@@ -1,11 +1,11 @@
-from protonmail import By, WebDriverWait, ActionChains, EC, Keys
+from protonmail import By, EC, Keys
 
 
 class SendLetter:
-    def __init__(self, driver):
+    def __init__(self, driver, wait, action):
         self.driver = driver
-        self.wait = WebDriverWait(driver, 10)
-        self.action = ActionChains(driver)
+        self.wait = wait
+        self.action = action
         self.new_letter_btn = '//*[@data-testid="sidebar:compose"]'
         self.subject_field = '//*[@data-testid="composer:subject"]'
         self.recipient_field = '//*[@data-testid="composer:to"]'
