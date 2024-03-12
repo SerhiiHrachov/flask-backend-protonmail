@@ -1,4 +1,3 @@
-from time import sleep
 from selenium.webdriver import Firefox, ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -11,6 +10,3 @@ from selenium.common.exceptions import (
     ElementNotVisibleException,
 )
 from bs4 import BeautifulSoup
-from .proton_mail import ProtonMail
-
-proton = ProtonMail()

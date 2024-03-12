@@ -1,5 +1,8 @@
+import os
+import logging
+from time import sleep
 from protonmail import (
-    sleep,
+    EC,
     Firefox,
     Options,
     ActionChains,
@@ -18,29 +21,45 @@ from protonmail.actions.make_action import MenuAction
 
 
 class ProtonMail:
+    _shared_state = {}
+
+    # Singelton
+    # instance = None
+    # def __new__(cls):
+    #     if cls.instance is None:
+    #         cls.instance = super().__new__(cls)
+    #     return cls.instance
+
     def __init__(self):
-        self.errors = [
-            NoSuchElementException,
-            ElementNotInteractableException,
-            ElementNotVisibleException,
-        ]
-        self.options = Options()
-        self.options.add_argument("--headless")
-        self.url = "https://mail.proton.me"
-        self.inbox_url = self.url + "/u/0/inbox"
-        self.outbox_url = self.url + "/u/0/all-sent"
-        self.all_mail_url = self.url + "/u/0/almost-all-mail"
-        self.unread_url = self.url + "/u/0/almost-all-mail#filter=unread"
-        self.delay = 10
+        self.__dict__ = self._shared_state
+        if not self._shared_state:
+            # self._shared_state = self.__dict__
+
+            self.errors = [
+                NoSuchElementException,
+                ElementNotInteractableException,
+                ElementNotVisibleException,
+            ]
+
+            self.url = os.environ.get("PROTONMAIL_URL")
+            self.inbox_url = self.url + "/u/0/inbox"
+            self.outbox_url = self.url + "/u/0/all-sent"
+            self.all_mail_url = self.url + "/u/0/almost-all-mail"
+            self.unread_url = self.url + "/u/0/almost-all-mail#filter=unread"
+            self.delay = 10
+            self.driver = None
 
     def start_session(self):
-        self.driver = Firefox(self.options)
+        options = Options()
+        # options.add_argument("--headless")
+        self.driver = Firefox(options=options)
         self.wait = WebDriverWait(self.driver, self.delay, 0.2, self.errors)
         self.action = ActionChains(self.driver)
         self.driver.implicitly_wait(self.delay)
         self.driver.maximize_window()
 
     def logining(self, username: str, password: str) -> bool:
+        self.start_session()
         driver = self.driver
         wait = self.wait
         sign_in = SignPage(driver, wait)
@@ -48,11 +67,10 @@ class ProtonMail:
         sign_in.enter_username(username)
         sign_in.enter_password(password)
         sign_in.click_signin()
-        sleep(self.delay)
-
+        wait.until(EC.title_contains(username))
         homepage = HomePage(driver)
         if homepage.verify_logining(username):
-            print("Logining success")
+            logging.info("Logining success")
             return True
         return False
 
@@ -66,8 +84,8 @@ class ProtonMail:
         letter.enter_message(message)
         letter.send_letter()
         if letter.validate_sended_letter():
-            print("Mail sended")
-            sleep(self.delay)
+            logging.info("Mail sending success")
+            # sleep(self.delay)
             return True
         return False
 
@@ -91,8 +109,15 @@ class ProtonMail:
         subject = get_letter.get_subject()
         message = get_letter.get_body()
 
-        if not sender or not datetime or not recipient or not subject:
-            raise Exception("Error")
+        if not sender:
+            raise NoSuchElementException("Sender not found")
+        if not datetime:
+            raise NoSuchElementException("Delivery datetime not found")
+        if not recipient:
+            raise NoSuchElementException("Recipient not found")
+        if not subject:
+            raise NoSuchElementException("Subject not found")
+
         return {
             "from": sender,
             "datetime": datetime,
@@ -141,7 +166,7 @@ class ProtonMail:
     def get_mail(self, url: str) -> list | bool:
         if self.check_current_url(url) is False:
             self.driver.get(url)
-        sleep(self.delay)
+            sleep(self.delay)
         soup = BeautifulSoup(self.driver.page_source, "lxml")
         data = GetMail().get_mail(soup)
         if data:

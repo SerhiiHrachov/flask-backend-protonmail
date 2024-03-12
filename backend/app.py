@@ -1,7 +1,7 @@
 import signal
 from flask import Flask
 from flask_restful import Api
-from protonmail import proton
+from protonmail.proton_mail import ProtonMail
 from .resources import (
     SignIn,
     Status,
@@ -45,5 +45,5 @@ if __name__ == "__main__":
     # app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))
     app.run()
     signal.pause()
-    proton.close_session()
+    ProtonMail().close_session()
     exit(0)
