@@ -23,18 +23,9 @@ from protonmail.actions.make_action import MenuAction
 class ProtonMail:
     _shared_state = {}
 
-    # Singelton
-    # instance = None
-    # def __new__(cls):
-    #     if cls.instance is None:
-    #         cls.instance = super().__new__(cls)
-    #     return cls.instance
-
     def __init__(self):
         self.__dict__ = self._shared_state
         if not self._shared_state:
-            # self._shared_state = self.__dict__
-
             self.errors = [
                 NoSuchElementException,
                 ElementNotInteractableException,
@@ -51,7 +42,7 @@ class ProtonMail:
 
     def start_session(self):
         options = Options()
-        # options.add_argument("--headless")
+        options.add_argument("--headless")
         self.driver = Firefox(options=options)
         self.wait = WebDriverWait(self.driver, self.delay, 0.2, self.errors)
         self.action = ActionChains(self.driver)
@@ -85,7 +76,6 @@ class ProtonMail:
         letter.send_letter()
         if letter.validate_sended_letter():
             logging.info("Mail sending success")
-            # sleep(self.delay)
             return True
         return False
 
