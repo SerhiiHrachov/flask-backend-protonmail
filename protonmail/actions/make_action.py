@@ -7,7 +7,7 @@ class MenuAction:
         self.action = action
         self.wait = wait
 
-    def make(self, id, name):
+    def make(self, id: str, name: str):
         scroll_script = "arguments[0].scrollIntoView(true);"
         btn = f'//*[@data-testid="context-menu-{name}"]'
         data_element_id = f'//*[@data-element-id="{id}"]'
@@ -20,11 +20,11 @@ class MenuAction:
         self.action.context_click(letter).perform()
         self.driver.find_element(By.XPATH, btn).click()
 
-    def trash(self, id):
+    def trash(self, id: str):
         self.make(id, "trash")
         return "email move to trash"
 
-    def archive(self, id):
+    def archive(self, id: str):
         self.make(id, "archive")
         return "email move to archive"
 

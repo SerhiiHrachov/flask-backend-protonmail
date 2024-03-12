@@ -4,13 +4,13 @@ import signal
 from flask_restful import Resource
 from marshmallow import ValidationError
 
-from protonmail import ProtonMail
+
+from protonmail.proton_mail import ProtonMail
 from backend.schemas import IdSchema, SendSchema
 from backend.parse import signin_post_args, send_post_args
 from backend.auth_credendials import auth
 
 proton = ProtonMail()
-proton.start_session()
 
 
 class SignIn(Resource):
